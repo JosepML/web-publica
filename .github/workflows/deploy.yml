@@ -42,6 +42,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: "https://oadmqwtnxpbotxcgzaoo.supabase.co"
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_cuj1iVbaEM0X_C9YiYV7eQ_FgwCxbbo"
           NEXT_PUBLIC_INDEXAR: "0"
+          NEXT_PUBLIC_BASE_PATH: "/web-publica"
         run: npm run build
 
       - name: Subir artefacto para GitHub Pages
