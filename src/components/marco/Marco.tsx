@@ -146,7 +146,6 @@ function Menu({ nombre }: { nombre: string }) {
               className="relative grid h-[34px] w-[34px] place-items-center rounded-full border-[1.5px] border-[var(--jm-texto)]/55 font-[family-name:var(--font-display-face),'Instrument_Serif',serif] text-[17px] italic font-normal tracking-normal"
             >
               JM
-              <span className="absolute -right-px top-[3px] h-1.5 w-1.5 rounded-full bg-[var(--jm-acento)]" />
             </span>
             {nombreCorto(nombre)}
           </Link>
