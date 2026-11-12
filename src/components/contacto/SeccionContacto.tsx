@@ -12,6 +12,7 @@ import { Retrato } from "./Retrato";
 export function SeccionContacto({
   medio,
   cabecera,
+  arriba,
   opciones,
   marcados,
   valor,
@@ -22,6 +23,8 @@ export function SeccionContacto({
   medio: Medio | null;
   /** Título y texto que van sobre la foto */
   cabecera: React.ReactNode;
+  /** Chip que va en la esquina de arriba de la foto */
+  arriba?: React.ReactNode;
   opciones: string[];
   marcados?: string[];
   valor?: string[];
@@ -33,11 +36,14 @@ export function SeccionContacto({
     <div className="mx-auto grid max-w-7xl items-stretch gap-4 sm:gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-14">
       <div className="lg:h-full">
         {medio ? (
-          <Retrato medio={medio} className="lg:h-full">
+          <Retrato medio={medio} arriba={arriba} className="lg:h-full">
             {cabecera}
           </Retrato>
         ) : (
-          <div>{cabecera}</div>
+          <div>
+            {arriba}
+            {cabecera}
+          </div>
         )}
       </div>
       <Revelar retraso={0.2} className="lg:h-full">

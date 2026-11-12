@@ -457,9 +457,9 @@ export function BloqueLlamada({ bloque, ancla, preseleccion = [] }: { bloque: Bl
             </Editable>
           ) : undefined
         }
+        arriba={ajustes.disponible ? <Disponible className="!border-white/20 !bg-black/30 text-white" /> : undefined}
         cabecera={
           <>
-            {ajustes.disponible && <Disponible className="mb-3 sm:mb-4" />}
             <h2 className="text-2xl font-extrabold leading-[1.04] tracking-[-0.04em] [text-wrap:balance] sm:text-[clamp(2rem,4.2vw,3.4rem)]">
               <Editable campo="titulo" valor={bloque.datos.titulo} vacio="Título">
                 <TituloConAcento texto={bloque.datos.titulo ?? ""} />
