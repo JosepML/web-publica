@@ -19,7 +19,20 @@ type Viaje = {
   imagen?: string;
   rect?: Rect;
   radio: number;
+  /** Punto de fijación (object-position) de la imagen en la tarjeta y en la cabecera de la ficha, para que el recorte no salte */
+  posOrigen: string;
+  posDestino: string;
+  /** Zoom y origen del zoom con que se veía la imagen en la tarjeta (p. ej. 1.1 en las diapositivas) */
+  escalaOrigen: number;
+  origenEscala: string;
 };
+
+/** El origen del zoom llega en píxeles; pasado a porcentaje sigue valiendo cuando la imagen cambia de tamaño */
+function origenEnPorcentaje(origen: string, r: DOMRect) {
+  const [x, y] = origen.split(" ").map(parseFloat);
+  if (!Number.isFinite(x) || !Number.isFinite(y) || !r.width || !r.height) return "50% 50%";
+  return `${(x / r.width) * 100}% ${(y / r.height) * 100}%`;
+}
 
 const Contexto = createContext<(href: string, imagen?: HTMLImageElement | null) => void>(() => {});
 
@@ -39,11 +52,19 @@ export function ProveedorTransicion({ children }: { children: React.ReactNode })
     (href: string, imagen?: HTMLImageElement | null) => {
       if (viaje) return;
       rutaSalida.current = pathname;
-      const r = imagen?.getBoundingClientRect();
       const marco = imagen?.closest<HTMLElement>("[data-radio]");
+      // El rectángulo es el de la tarjeta (no el de la imagen, que puede ser mayor por su zoom)
+      const r = (marco ?? imagen)?.getBoundingClientRect();
+      const estilo = imagen ? getComputedStyle(imagen) : null;
+      const escalaOrigen = estilo && estilo.transform !== "none" ? new DOMMatrixReadOnly(estilo.transform).a || 1 : 1;
       const radio = marco ? parseFloat(getComputedStyle(marco).borderTopLeftRadius) || 0 : 0;
+      const posOrigen = imagen ? getComputedStyle(imagen).objectPosition || "50% 50%" : "50% 50%";
       setViaje({
         href,
+        posOrigen,
+        escalaOrigen,
+        origenEscala: r && estilo ? origenEnPorcentaje(estilo.transformOrigin, r) : "50% 50%",
+        posDestino: imagen?.dataset.focoDestino || posOrigen,
         estilo: reducir || !imagen ? "fundido" : "cristal",
         fase: "salida",
         imagen: imagen?.currentSrc || imagen?.src,
@@ -101,15 +122,24 @@ function Capa({ viaje, alSalir, alLlegar }: { viaje: Viaje; alSalir: () => void;
           animate={{ opacity: llegando ? 0 : 1 }}
           transition={{ duration: llegando ? 0.45 : 0.6 }}
         />
-        <motion.img
-          src={viaje.imagen}
-          alt=""
-          className="absolute object-cover shadow-2xl"
-          initial={{ ...viaje.rect, borderRadius: viaje.radio }}
+        <motion.div
+          className="absolute overflow-hidden shadow-2xl"
+          initial={{ ...viaje.rect, borderRadius: viaje.radio, opacity: 1 }}
           animate={llegando ? { ...destino, opacity: 0 } : { ...destino, opacity: 1 }}
           transition={llegando ? { duration: 0.5, ease: "easeOut" } : { duration: 0.85, ease: [0.65, 0, 0.2, 1] }}
           onAnimationComplete={() => (llegando ? alLlegar() : alSalir())}
-        />
+        >
+          {/* Mismo recorte que la tarjeta al salir y que la cabecera al llegar: sin saltos */}
+          <motion.img
+            src={viaje.imagen}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            style={{ transformOrigin: viaje.origenEscala, objectPosition: viaje.posOrigen }}
+            initial={{ scale: viaje.escalaOrigen, objectPosition: viaje.posOrigen }}
+            animate={{ scale: 1.02, objectPosition: viaje.posDestino }}
+            transition={{ duration: 0.85, ease: [0.65, 0, 0.2, 1] }}
+          />
+        </motion.div>
       </div>
     );
   }

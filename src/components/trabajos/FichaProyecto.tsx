@@ -331,6 +331,7 @@ export function FichaProyecto({ proyecto: p, siguiente, servicios }: { proyecto:
                 {siguiente.poster && (
                   <img
                     data-transicion
+                    data-foco-destino={enfoque(siguiente.imagenCabecera ?? siguiente.poster)?.objectPosition ?? "50% 50%"}
                     src={img(siguiente.poster.url, 3840)}
                     style={enfoque(siguiente.poster)}
                     alt=""

@@ -101,6 +101,7 @@ function ProyectoAncho({ proyecto: p }: { proyecto: Proyecto }) {
         {p.poster && (
           <img
             data-transicion
+            data-foco-destino={enfoque(p.imagenCabecera ?? p.poster)?.objectPosition ?? "50% 50%"}
             src={img(p.poster.url, 3840)}
             style={enfoque(p.poster)}
             alt=""
@@ -505,7 +506,7 @@ function TarjetaCarrusel({ proyecto: p, activa, compacta }: { proyecto: Proyecto
     >
       {/* Sombra fija (no se anima) y radio fijo: al escalar la tarjeta no hay que repintar nada */}
       <div data-radio className="relative h-full overflow-hidden rounded-[32px] bg-black shadow-[0_30px_60px_-36px_rgba(0,0,0,0.75)]">
-        <Diapositivas imagenes={fotogramas(p)} medios={mediosDeProyecto(p)} activo={activa && encima && fino} className={MASCARA_BORDE} />
+        <Diapositivas imagenes={fotogramas(p)} medios={mediosDeProyecto(p)} focoDestino={enfoque(p.imagenCabecera ?? p.poster)?.objectPosition as string | undefined} activo={activa && encima && fino} className={MASCARA_BORDE} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
         {/* Las vecinas se apagan con un velo negro y no con opacidad: sobre el fondo claro la opacidad las
             dejaba lechosas. El velo es más denso en oscuro (--d-velo-vecina) para que se parezcan */}
@@ -558,7 +559,7 @@ export function TarjetaProyecto({ proyecto: p }: { proyecto: Proyecto }) {
         data-foco
         className="relative aspect-[16/10] overflow-hidden rounded-[16px] bg-black shadow-[0_30px_60px_-30px_rgba(0,0,0,0.6)] sm:aspect-[3/2] sm:rounded-[32px]"
       >
-        <Diapositivas imagenes={fotogramas(p)} medios={mediosDeProyecto(p)} activo={encima && fino} ancho={1200} className={MASCARA_BORDE} />
+        <Diapositivas imagenes={fotogramas(p)} medios={mediosDeProyecto(p)} focoDestino={enfoque(p.imagenCabecera ?? p.poster)?.objectPosition as string | undefined} activo={encima && fino} ancho={1200} className={MASCARA_BORDE} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-transparent" />
 
         {premio && (

@@ -298,6 +298,7 @@ export function Diapositivas({
   className = "",
   intervalo = 1600,
   ancho = 1920,
+  focoDestino,
 }: {
   imagenes: string[];
   /** Las fotos de `imagenes` como medios, para aplicar su punto de interés al recortarlas */
@@ -307,6 +308,8 @@ export function Diapositivas({
   intervalo?: number;
   /** Ancho de la imagen servida: el de la tarjeta en pantalla, no más (subirla a la GPU cuesta según sus píxeles) */
   ancho?: 640 | 750 | 828 | 1080 | 1200 | 1920 | 3840;
+  /** Punto de fijación de la cabecera adonde lleva esta tarjeta (para la transición de página) */
+  focoDestino?: string;
 }) {
   const [i, setI] = useState(0);
   const [haActivado, setHaActivado] = useState(false);
@@ -337,6 +340,7 @@ export function Diapositivas({
             src={img(src, ancho)}
             alt=""
             data-transicion={n === 0 ? "" : undefined}
+            data-foco-destino={n === 0 ? focoDestino : undefined}
             draggable={false}
             decoding="async"
             className="absolute inset-0 h-full w-full object-cover transition-[opacity,transform] ease-[cubic-bezier(0.22,1,0.36,1)]"
