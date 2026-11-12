@@ -371,3 +371,19 @@ html {
     height: min(56svh, 600px);
   }
 }
+
+/* Aparición de imágenes al cargar (ver components/marco/aparicionImagenes.ts). Mientras una imagen se
+   descarga está a 0; al terminar, un fundido corto desde negro. Solo ocurre con la carga: las imágenes en
+   caché no pasan por aquí. Sin media query de «reducir movimiento», como el resto de la web. */
+img[data-jm-carga="espera"] {
+  opacity: 0 !important;
+}
+@keyframes jm-aparece {
+  from {
+    opacity: 0;
+    filter: brightness(0.35);
+  }
+}
+.jm-aparece {
+  animation: jm-aparece 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}

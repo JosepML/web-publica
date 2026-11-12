@@ -6,10 +6,11 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Ajustes } from "@/lib/datos/tipos";
 import { RUTAS } from "@/lib/rutas";
-import { CURVA } from "@/styles/movimiento";
+import { CURVA, CURVA_VIAJE } from "@/styles/movimiento";
 import { usePantallaAncha, useReducir } from "../comun/hooks";
 import { Icono } from "../Iconos";
 import { Pie } from "./Pie";
+import { useAparicionImagenes } from "./aparicionImagenes";
 import { useAnclas, useScrollMagico } from "./scrollMagico";
 
 /** Menú principal. «Trabajos» primero (plan/contenido/fundamentos.md). Llevan a las secciones de Inicio
@@ -37,6 +38,7 @@ export function Marco({ ajustes, children }: { ajustes: Ajustes; children: React
   // Solo en Inicio y en pantalla de ordenador (en móvil el scroll es siempre 100% nativo)
   useScrollMagico(ancha && ruta === RUTAS.inicio && !reducir);
   useAnclas(ruta);
+  useAparicionImagenes();
 
   return (
     <div data-tema="oscuro" data-reducir={reducir ? "" : undefined} className="jm-raiz relative min-h-svh overflow-x-clip">
@@ -104,6 +106,7 @@ function Menu({ nombre }: { nombre: string }) {
   const [compacto, setCompacto] = useState(false);
   const [oculto, setOculto] = useState(false);
   const [abierto, setAbierto] = useState(false);
+  const ruta = usePathname();
 
   useMotionValueEvent(scrollY, "change", (y) => {
     const previo = scrollY.getPrevious() ?? 0;
@@ -117,6 +120,19 @@ function Menu({ nombre }: { nombre: string }) {
     document.addEventListener("pointermove", mover, { passive: true });
     return () => document.removeEventListener("pointermove", mover);
   }, []);
+
+  // Con el menú móvil abierto la página de detrás no se desplaza
+  useEffect(() => {
+    if (!abierto) return;
+    const previo = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.documentElement.style.overflow = previo;
+    };
+  }, [abierto]);
+
+  // Al cambiar de página, el menú se cierra
+  useEffect(() => setAbierto(false), [ruta]);
 
   // Con teclado, Escape cierra el menú móvil
   useEffect(() => {
@@ -171,7 +187,16 @@ function Menu({ nombre }: { nombre: string }) {
               aria-expanded={abierto}
               className="flex h-9 w-9 items-center justify-center rounded-full md:hidden"
             >
-              <Icono nombre={abierto ? "cerrar" : "menu"} className="h-5 w-5" />
+              <span aria-hidden className="relative block h-5 w-5">
+                <span
+                  className="absolute left-[3px] right-[3px] top-[7px] h-[1.5px] rounded-full bg-current transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                  style={{ transform: abierto ? "translateY(3px) rotate(45deg)" : "none" }}
+                />
+                <span
+                  className="absolute left-[3px] right-[3px] top-[12px] h-[1.5px] rounded-full bg-current transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                  style={{ transform: abierto ? "translateY(-2px) rotate(-45deg)" : "none" }}
+                />
+              </span>
             </button>
           </div>
         </nav>
@@ -179,27 +204,65 @@ function Menu({ nombre }: { nombre: string }) {
 
       <AnimatePresence>
         {abierto && (
-          <motion.div
-            className="fixed inset-x-3 top-[76px] z-50 md:hidden"
-            initial={{ opacity: 0, y: -12, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.97 }}
-            transition={{ duration: 0.35, ease: CURVA }}
-          >
-            <div className="cristal cristal-fuerte flex flex-col gap-1 rounded-[28px] p-3">
-              {[...ENLACES, { nombre: "Hablemos", href: HABLEMOS }].map((e, i) => (
-                <motion.div key={e.nombre} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.04 * i }}>
-                  <Link
-                    href={e.href}
-                    onClick={() => setAbierto(false)}
-                    className="block rounded-2xl px-4 py-3 text-2xl font-bold tracking-tight hover:bg-[var(--jm-cristal)]"
-                  >
-                    {e.nombre}
+          <>
+            <motion.div
+              key="velo"
+              aria-hidden
+              className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[6px] md:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: CURVA }}
+              onClick={() => setAbierto(false)}
+            />
+            <motion.div
+              key="panel"
+              className="fixed inset-x-3 top-[76px] z-50 md:hidden"
+              initial={{ opacity: 0, y: -10, clipPath: "inset(0 0 100% 0 round 28px)" }}
+              animate={{ opacity: 1, y: 0, clipPath: "inset(0 0 0% 0 round 28px)" }}
+              exit={{ opacity: 0, y: -6, clipPath: "inset(0 0 100% 0 round 28px)", transition: { duration: 0.28, ease: CURVA_VIAJE } }}
+              transition={{ duration: 0.6, ease: CURVA }}
+            >
+              <div className="cristal cristal-fuerte rounded-[28px] px-5 pb-5 pt-2">
+                <ul className="flex flex-col">
+                  {ENLACES.map((e, i) => {
+                    const activo = ruta === e.href || (e.href.length > 1 && !e.href.includes("#") && ruta.startsWith(e.href));
+                    return (
+                      <motion.li
+                        key={e.nombre}
+                        className="border-b border-[var(--jm-linea)] last:border-b-0"
+                        initial={{ opacity: 0, y: 14, filter: "blur(6px)" }}
+                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                        transition={{ duration: 0.6, ease: CURVA, delay: 0.12 + 0.06 * i }}
+                      >
+                        <Link
+                          href={e.href}
+                          onClick={() => setAbierto(false)}
+                          className="group flex items-center justify-between py-[15px] text-[26px] font-semibold tracking-[-0.02em] text-[var(--jm-texto)] active:opacity-60"
+                        >
+                          <span className="flex items-center gap-3">
+                            {e.nombre}
+                            {activo && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[var(--jm-acento)]" />}
+                          </span>
+                          <Icono nombre="flecha" className="h-4 w-4 text-[var(--jm-tenue)] transition-transform duration-300 group-active:translate-x-1" />
+                        </Link>
+                      </motion.li>
+                    );
+                  })}
+                </ul>
+                <motion.div
+                  className="pt-4"
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: CURVA, delay: 0.12 + 0.06 * ENLACES.length }}
+                >
+                  <Link href={HABLEMOS} onClick={() => setAbierto(false)} className="boton boton-acento w-full py-3.5 text-[15px]">
+                    Hablemos
                   </Link>
                 </motion.div>
-              ))}
-            </div>
-          </motion.div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
