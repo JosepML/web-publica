@@ -169,7 +169,7 @@ export function BloqueClientes({ bloque }: { bloque: Bloque }) {
   const columnasJuno = sm ? colJunoBase : 3;
 
   return (
-    <section className="py-8 sm:py-24 lg:py-[6svh]">
+    <section className="py-8 sm:py-24 lg:py-[3.5svh]">
       {/* Primera parte, la principal: titular de verdad y todas las marcas a la vista a la vez */}
       <div data-punto-alto>
         <div className="px-4 sm:px-8">
@@ -187,7 +187,7 @@ export function BloqueClientes({ bloque }: { bloque: Bloque }) {
                 return (
                   <motion.div
                     key={c.id}
-                    className="flex h-12 items-center justify-center px-1 text-center sm:h-24 sm:px-2 lg:h-[min(7rem,12svh)]"
+                    className="flex h-12 items-center justify-center px-1 text-center sm:h-24 sm:px-2 lg:h-[min(7rem,10svh)]"
                     style={{ width: `${100 / columnas}%` }}
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -207,7 +207,7 @@ export function BloqueClientes({ bloque }: { bloque: Bloque }) {
 
       {/* Segunda parte, secundaria dentro de la misma sección: JUNO más pequeño y con menos contraste */}
       {juno.length > 0 && (
-        <div data-punto-alto className="mx-auto mt-8 max-w-7xl px-4 text-center sm:mt-14 sm:px-8 lg:mt-[6svh]">
+        <div data-punto-alto className="mx-auto mt-8 max-w-7xl px-4 text-center sm:mt-14 sm:px-8 lg:mt-[3.5svh]">
           <Revelar>
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--jm-ante)] sm:text-[11px] sm:tracking-[0.28em]">En sinergia con</p>
             <p className="mt-2 text-2xl leading-none tracking-[0.16em] text-[var(--jm-juno)] sm:mt-5 sm:text-4xl">
@@ -226,11 +226,11 @@ export function BloqueClientes({ bloque }: { bloque: Bloque }) {
             )}
           </Revelar>
           <Revelar retraso={0.12}>
-            <div className="mx-auto mt-5 flex flex-col divide-y divide-[var(--jm-linea)] border-t border-[var(--jm-linea)] sm:mt-8">
+            <div className="mx-auto mt-5 flex flex-col divide-y divide-[var(--jm-linea)] border-t border-[var(--jm-linea)] sm:mt-8 lg:mt-[2.5svh]">
               {enFilas(juno, columnasJuno).map((fila, f) => (
                 <div key={f} className="flex justify-center divide-x divide-[var(--jm-linea)]">
                   {fila.map((c) => (
-                    <div key={c.id} className="flex h-11 items-center justify-center sm:h-16" style={{ width: `${100 / columnasJuno}%` }}>
+                    <div key={c.id} className="flex h-11 items-center justify-center sm:h-16 lg:h-[min(4rem,5.8svh)]" style={{ width: `${100 / columnasJuno}%` }}>
                       <Logo cliente={c} compacto />
                     </div>
                   ))}
