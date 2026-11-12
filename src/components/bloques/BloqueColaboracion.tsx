@@ -118,8 +118,8 @@ function Apertura({ bloque }: { bloque: Bloque }) {
       </div>
 
       <div className="relative mx-auto max-w-5xl text-center">
-        <p className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-lg sm:gap-5 sm:text-2xl" aria-label="Josep Mira y JUNO Media">
-          <motion.span className="text-right font-extrabold tracking-[-0.03em]" initial={desde(-28)} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.2, ease: CURVA, delay: 0.15 }}>
+        <p className="flex flex-col items-center gap-3 text-xl sm:grid sm:grid-cols-[1fr_auto_1fr] sm:gap-5 sm:text-2xl" aria-label="Josep Mira y JUNO Media">
+          <motion.span className="text-center sm:text-right font-extrabold tracking-[-0.03em]" initial={desde(-28)} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.2, ease: CURVA, delay: 0.15 }}>
             Josep Mira
           </motion.span>
           <motion.span
@@ -131,7 +131,7 @@ function Apertura({ bloque }: { bloque: Bloque }) {
           >
             ×
           </motion.span>
-          <motion.span className="text-left tracking-[0.16em]" initial={desde(28)} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.2, ease: CURVA, delay: 0.15 }}>
+          <motion.span className="text-center sm:text-left tracking-[0.16em]" initial={desde(28)} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.2, ease: CURVA, delay: 0.15 }}>
             <MarcaJuno />
           </motion.span>
         </p>

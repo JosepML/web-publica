@@ -118,7 +118,7 @@ function ProyectoAncho({ proyecto: p }: { proyecto: Proyecto }) {
           <div className="min-w-0">
             <div className="flex items-center gap-3">
               <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-white/65">{[p.tipo?.nombre, p.anio].filter(Boolean).join(" · ")}</p>
-              {p.conJuno && <SelloJuno pequeno enTarjeta className="-my-1 hidden shrink-0 sm:inline-flex" />}
+              {p.conJuno && <SelloJuno pequeno enTarjeta className="-my-1 max-sm:hidden shrink-0" />}
             </div>
             <h3 className="mt-1 pb-[0.06em] text-xl font-extrabold leading-[1.04] tracking-[-0.045em] sm:mt-2 sm:text-5xl">{p.titulo}</h3>
             {p.papel && <p className="mt-2 text-sm text-white/75 sm:text-base">{p.papel}</p>}
@@ -575,7 +575,7 @@ export function TarjetaProyecto({ proyecto: p }: { proyecto: Proyecto }) {
         <div className="absolute inset-x-2 bottom-2 z-[3] rounded-[14px] border border-white/15 bg-black/65 p-2 text-white transition-transform duration-500 group-hover:-translate-y-1 sm:inset-x-3 sm:bottom-3 sm:rounded-[24px] sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <p className="truncate text-[9px] font-medium uppercase tracking-[0.1em] text-white/60 sm:text-[11px] sm:tracking-[0.14em]">{[p.tipo?.nombre, p.anio].filter(Boolean).join(" · ")}</p>
-            {p.conJuno && <SelloJuno pequeno enTarjeta className="-my-1 hidden shrink-0 sm:inline-flex" />}
+            {p.conJuno && <SelloJuno pequeno enTarjeta className="-my-1 max-sm:hidden shrink-0" />}
           </div>
           <h3 className="mt-0.5 truncate text-xs font-bold leading-tight tracking-[-0.02em] sm:mt-1 sm:text-2xl">{p.titulo}</h3>
           {/* El cargo no ocupa línea hasta que se pasa el ratón: la fila se abre despacio y el texto aparece con ella */}
