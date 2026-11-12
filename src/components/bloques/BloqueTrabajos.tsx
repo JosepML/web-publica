@@ -567,7 +567,7 @@ export function TarjetaProyecto({ proyecto: p }: { proyecto: Proyecto }) {
             {premio.nombre}
           </span>
         )}
-        {p.conJuno && <SelloJuno pequeno enTarjeta className="absolute right-2 top-2 z-[3] origin-top-right scale-75 sm:hidden" />}
+        {p.conJuno && <SelloJuno pequeno enTarjeta className={`absolute z-[3] scale-75 sm:hidden ${premio ? "left-2 top-7 origin-top-left" : "right-2 top-2 origin-top-right"}`} />}
         <span className="absolute right-4 top-4 z-[3] hidden h-10 w-10 translate-y-1 items-center justify-center rounded-full border border-white/25 bg-black/40 text-white opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 sm:flex">
           <Icono nombre="flecha" className="h-4 w-4 -rotate-45" />
         </span>
