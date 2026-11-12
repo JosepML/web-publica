@@ -1,0 +1,22 @@
+name: Mantener Supabase activo
+
+# Supabase pausa los proyectos gratuitos sin actividad durante 7 días.
+# Esta visita (una lectura pública de una fila) se hace cada 2 días.
+on:
+  schedule:
+    - cron: "17 6 */2 * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  visita:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Leer una fila pública de Supabase
+        run: |
+          code=$(curl -sS -o /dev/null -w "%{http_code}" \
+            -H "apikey: sb_publishable_cuj1iVbaEM0X_C9YiYV7eQ_FgwCxbbo" \
+            "https://oadmqwtnxpbotxcgzaoo.supabase.co/rest/v1/proyectos?select=id&limit=1")
+          echo "Respuesta de Supabase: $code"
+          test "$code" = "200"
