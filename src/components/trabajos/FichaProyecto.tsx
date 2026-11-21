@@ -80,24 +80,33 @@ export function FichaProyecto({ proyecto: p, siguiente, servicios }: { proyecto:
     p.videos.find((v) => v.tipo === "archivo" && v.url) ??
     (p.videos.length > 0 ? p.videos.find((v) => v.url) : undefined);
 
-  // Prueba previa: nada más abrir la ficha se comprueba si el servidor del vídeo propio responde (3 s como máximo)
+  // Prueba de Cloudflare: al abrir la ficha y después cada 10 s mientras siga abierta (doble comprobación, para
+  // corregir falsos positivos o detectar que el servidor cae o vuelve a mitad de la visita). Cada prueba espera 4 s
   const [estadoArchivo, setEstadoArchivo] = useState<"pendiente" | "ok" | "caido">("pendiente");
   const urlPrueba = respaldoYoutube ? principal?.url : undefined;
   useEffect(() => {
     if (!urlPrueba) return;
     let activo = true;
-    const control = new AbortController();
-    const corte = window.setTimeout(() => control.abort(), 3000);
-    fetch(urlPrueba, { method: "HEAD", mode: "no-cors", cache: "no-store", signal: control.signal })
-      .then(() => activo && setEstadoArchivo("ok"))
-      .catch(() => activo && setEstadoArchivo("caido"))
-      .finally(() => window.clearTimeout(corte));
+    let control: AbortController | undefined;
+    const probar = () => {
+      if (document.hidden || video) return; // en segundo plano o con el reproductor abierto no hace falta
+      control?.abort();
+      const c = new AbortController();
+      control = c;
+      const corte = window.setTimeout(() => c.abort(), 4000);
+      fetch(urlPrueba, { method: "HEAD", mode: "no-cors", cache: "no-store", signal: c.signal })
+        .then(() => activo && control === c && setEstadoArchivo("ok"))
+        .catch(() => activo && control === c && setEstadoArchivo("caido"))
+        .finally(() => window.clearTimeout(corte));
+    };
+    probar();
+    const repetir = window.setInterval(probar, 10000);
     return () => {
       activo = false;
-      control.abort();
-      window.clearTimeout(corte);
+      control?.abort();
+      window.clearInterval(repetir);
     };
-  }, [urlPrueba]);
+  }, [urlPrueba, video]);
 
   // Si hay vídeo propio principal explícito, no lo repetimos en «Más vídeos».
   // Si se tomó el primer vídeo de una serie de piezas/reels (como en Lavandería Grupo LON), se mantienen todas en «Más vídeos».
