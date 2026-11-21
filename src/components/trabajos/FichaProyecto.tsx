@@ -71,6 +71,9 @@ export function FichaProyecto({ proyecto: p, siguiente, servicios }: { proyecto:
         }
       : undefined;
 
+  // Respaldo: si Cloudflare no responde (p. ej. bloqueos de red en España en días de fútbol), se usa YouTube
+  const respaldoYoutube = p.slug === "y-el-ano-que-viene-que" ? "dHp3YUb1x2I" : undefined;
+
   const principal =
     p.videos.find((v) => v.tipo === "archivo" && v.rol === "principal" && v.url) ??
     (p.slug === "y-el-ano-que-viene-que" ? videoCloudflareYElAno : undefined) ??
@@ -352,7 +355,7 @@ export function FichaProyecto({ proyecto: p, siguiente, servicios }: { proyecto:
       )}
 
       {principal ? (
-        <ModalVideo archivo={principal.url} vertical={!!principal.vertical} abierto={video} alCerrar={() => setVideo(false)} />
+        <ModalVideo archivo={principal.url} respaldoYoutube={respaldoYoutube} vertical={!!principal.vertical} abierto={video} alCerrar={() => setVideo(false)} />
       ) : p.youtubeId ? (
         <ModalVideo id={p.youtubeId} abierto={video} alCerrar={() => setVideo(false)} />
       ) : null}

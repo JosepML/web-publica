@@ -191,6 +191,7 @@ export function ModalVideo({
   id,
   src,
   archivo,
+  respaldoYoutube,
   vertical,
   abierto,
   alCerrar,
@@ -198,10 +199,25 @@ export function ModalVideo({
   id?: string;
   src?: string;
   archivo?: string;
+  /** Si el vídeo propio no arranca (red bloqueada, servidor caído), se reproduce este vídeo de YouTube. */
+  respaldoYoutube?: string;
   vertical?: boolean;
   abierto: boolean;
   alCerrar: () => void;
 }) {
+  // Detector: el vídeo propio (Cloudflare) falla si da error o si no ha cargado nada pasados unos segundos
+  const [falloArchivo, setFalloArchivo] = useState(false);
+  const [archivoListo, setArchivoListo] = useState(false);
+  useEffect(() => {
+    setFalloArchivo(false);
+    setArchivoListo(false);
+  }, [abierto, archivo]);
+  useEffect(() => {
+    if (!abierto || !archivo || !respaldoYoutube || archivoListo) return;
+    const espera = window.setTimeout(() => setFalloArchivo(true), 8000);
+    return () => window.clearTimeout(espera);
+  }, [abierto, archivo, respaldoYoutube, archivoListo]);
+
   useEffect(() => {
     if (!abierto) return;
     const tecla = (e: KeyboardEvent) => e.key === "Escape" && alCerrar();
@@ -249,12 +265,20 @@ export function ModalVideo({
             transition={{ duration: 0.5, ease: CURVA }}
             onClick={(e) => e.stopPropagation()}
           >
-            {archivo ? (
-              <video className="absolute inset-0 h-full w-full bg-black object-contain" src={archivo} autoPlay controls playsInline />
+            {archivo && !falloArchivo ? (
+              <video
+                className="absolute inset-0 h-full w-full bg-black object-contain"
+                src={archivo}
+                autoPlay
+                controls
+                playsInline
+                onLoadedData={() => setArchivoListo(true)}
+                onError={() => respaldoYoutube && setFalloArchivo(true)}
+              />
             ) : (
               <iframe
                 className="absolute inset-0 h-full w-full"
-                src={src ?? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
+                src={src ?? `https://www.youtube-nocookie.com/embed/${archivo ? respaldoYoutube : id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
                 allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
                 allowFullScreen
                 title="Vídeo"
