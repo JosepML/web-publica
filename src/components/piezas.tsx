@@ -211,16 +211,26 @@ export function ModalVideo({
   // Detector: el vídeo propio (Cloudflare) falla si da error o si no ha cargado nada pasados unos segundos
   const [falloArchivo, setFalloArchivo] = useState(false);
   const [archivoListo, setArchivoListo] = useState(false);
+  // Cada señal real del vídeo (bytes que llegan, metadatos, imagen) reinicia la espera
+  const [senales, setSenales] = useState(0);
+  const senal = () => setSenales((n) => n + 1);
   useEffect(() => {
     setFalloArchivo(false);
     setArchivoListo(false);
+    setSenales(0);
   }, [abierto, archivo]);
+  // Sin ninguna señal durante 3,5 s se da por caído (lo que hace un bloqueo de red), aunque la prueba previa dijera "ok";
+  // mientras lleguen bytes se espera, con un tope de 20 s
   useEffect(() => {
     if (!abierto || !archivo || !respaldoYoutube || archivoListo) return;
-    // Si la prueba previa ya confirmó que Cloudflare responde, se da más margen (conexión lenta); si no, poco
-    const espera = window.setTimeout(() => setFalloArchivo(true), archivoCaido === "ok" ? 10000 : 3500);
+    const espera = window.setTimeout(() => setFalloArchivo(true), 3500);
     return () => window.clearTimeout(espera);
-  }, [abierto, archivo, respaldoYoutube, archivoListo, archivoCaido]);
+  }, [abierto, archivo, respaldoYoutube, archivoListo, senales]);
+  useEffect(() => {
+    if (!abierto || !archivo || !respaldoYoutube || archivoListo) return;
+    const tope = window.setTimeout(() => setFalloArchivo(true), 20000);
+    return () => window.clearTimeout(tope);
+  }, [abierto, archivo, respaldoYoutube, archivoListo]);
 
   useEffect(() => {
     if (!abierto) return;
@@ -276,6 +286,9 @@ export function ModalVideo({
                 autoPlay
                 controls
                 playsInline
+                onLoadStart={senal}
+                onProgress={senal}
+                onLoadedMetadata={senal}
                 onLoadedData={() => setArchivoListo(true)}
                 onError={() => respaldoYoutube && setFalloArchivo(true)}
               />
