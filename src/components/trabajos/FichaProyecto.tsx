@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { laurel } from "@/lib/datos/seleccion";
 import type { Proyecto, Servicio } from "@/lib/datos/tipos";
 import { RUTAS } from "@/lib/rutas";
@@ -79,6 +79,25 @@ export function FichaProyecto({ proyecto: p, siguiente, servicios }: { proyecto:
     (p.slug === "y-el-ano-que-viene-que" ? videoCloudflareYElAno : undefined) ??
     p.videos.find((v) => v.tipo === "archivo" && v.url) ??
     (p.videos.length > 0 ? p.videos.find((v) => v.url) : undefined);
+
+  // Prueba previa: nada más abrir la ficha se comprueba si el servidor del vídeo propio responde (3 s como máximo)
+  const [estadoArchivo, setEstadoArchivo] = useState<"pendiente" | "ok" | "caido">("pendiente");
+  const urlPrueba = respaldoYoutube ? principal?.url : undefined;
+  useEffect(() => {
+    if (!urlPrueba) return;
+    let activo = true;
+    const control = new AbortController();
+    const corte = window.setTimeout(() => control.abort(), 3000);
+    fetch(urlPrueba, { method: "HEAD", mode: "no-cors", cache: "no-store", signal: control.signal })
+      .then(() => activo && setEstadoArchivo("ok"))
+      .catch(() => activo && setEstadoArchivo("caido"))
+      .finally(() => window.clearTimeout(corte));
+    return () => {
+      activo = false;
+      control.abort();
+      window.clearTimeout(corte);
+    };
+  }, [urlPrueba]);
 
   // Si hay vídeo propio principal explícito, no lo repetimos en «Más vídeos».
   // Si se tomó el primer vídeo de una serie de piezas/reels (como en Lavandería Grupo LON), se mantienen todas en «Más vídeos».
@@ -355,7 +374,7 @@ export function FichaProyecto({ proyecto: p, siguiente, servicios }: { proyecto:
       )}
 
       {principal ? (
-        <ModalVideo archivo={principal.url} respaldoYoutube={respaldoYoutube} vertical={!!principal.vertical} abierto={video} alCerrar={() => setVideo(false)} />
+        <ModalVideo archivo={principal.url} respaldoYoutube={respaldoYoutube} archivoCaido={estadoArchivo} vertical={!!principal.vertical} abierto={video} alCerrar={() => setVideo(false)} />
       ) : p.youtubeId ? (
         <ModalVideo id={p.youtubeId} abierto={video} alCerrar={() => setVideo(false)} />
       ) : null}

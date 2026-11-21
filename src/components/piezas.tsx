@@ -192,6 +192,7 @@ export function ModalVideo({
   src,
   archivo,
   respaldoYoutube,
+  archivoCaido,
   vertical,
   abierto,
   alCerrar,
@@ -201,6 +202,8 @@ export function ModalVideo({
   archivo?: string;
   /** Si el vídeo propio no arranca (red bloqueada, servidor caído), se reproduce este vídeo de YouTube. */
   respaldoYoutube?: string;
+  /** Resultado de la prueba previa del archivo propio: `caido` salta a YouTube sin esperar, `ok` confirma que responde. */
+  archivoCaido?: "pendiente" | "ok" | "caido";
   vertical?: boolean;
   abierto: boolean;
   alCerrar: () => void;
@@ -214,9 +217,10 @@ export function ModalVideo({
   }, [abierto, archivo]);
   useEffect(() => {
     if (!abierto || !archivo || !respaldoYoutube || archivoListo) return;
-    const espera = window.setTimeout(() => setFalloArchivo(true), 8000);
+    // Si la prueba previa ya confirmó que Cloudflare responde, se da más margen (conexión lenta); si no, poco
+    const espera = window.setTimeout(() => setFalloArchivo(true), archivoCaido === "ok" ? 10000 : 3500);
     return () => window.clearTimeout(espera);
-  }, [abierto, archivo, respaldoYoutube, archivoListo]);
+  }, [abierto, archivo, respaldoYoutube, archivoListo, archivoCaido]);
 
   useEffect(() => {
     if (!abierto) return;
@@ -265,7 +269,7 @@ export function ModalVideo({
             transition={{ duration: 0.5, ease: CURVA }}
             onClick={(e) => e.stopPropagation()}
           >
-            {archivo && !falloArchivo ? (
+            {archivo && !falloArchivo && archivoCaido !== "caido" ? (
               <video
                 className="absolute inset-0 h-full w-full bg-black object-contain"
                 src={archivo}
